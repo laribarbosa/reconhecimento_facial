@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="KeyFace.png">
+    <title>Cadastro Realizado</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e; 
+            --card-color: #2c2c54; 
+            --primary-color: #00bcd4; 
+            --success-color: #4CAF50;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .container {
+            background-color: var(--card-color);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            color: var(--success-color);
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .user-id {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        .option-button {
+            display: inline-block;
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin: 10px;
+            text-decoration: none;
+        }
+        .option-button:hover {
+            background: #00a0b2;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>✅ Cadastro Realizado com Sucesso!</h2>
+        <p>O novo usuário foi criado e sua foto foi salva no sistema.</p>
+        <div class="user-id" id="displayId">ID: Carregando...</div>
+        
+        <a href="cadastro.html" class="option-button">Cadastrar Outro Usuário</a>
+        <a href="index.html" class="option-button">Voltar à Tela Inicial</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const userId = params.get('id');
+            const displayElement = document.getElementById('displayId');
+            
+            if (userId) {
+                displayElement.textContent = `ID do Usuário: ${userId}`;
+            } else {
+                displayElement.textContent = "ID não encontrado na URL.";
+            }
+        });
+    </script>
+</body>
+</html>

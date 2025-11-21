@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="KeyFace.png">
+    <title>Painel do Ministério - KeyFace</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        :root {
+            --bg-color: #1a1a2e;
+            --card-color: #2c2c54;
+            --primary-color: #00bcd4;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-color);
+            padding: 30px;
+            width: 100%;
+            max-width: 900px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.6);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header img {
+            width: 60px;
+        }
+
+        .back-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            margin-top: 25px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .list-box {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            background: rgba(255,255,255,0.08);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 260px !important;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="card-header">
+    <img src="KeyFace (1).png">
+
+    <span id="bemVindo" style="font-weight:600; font-size:1rem; color:var(--primary-color);">
+        Bem-vindo!
+    </span>
+
+    <a href="index.html" class="back-link">⟵ Sair</a>
+    </div>
+
+    <h2>Painel do Ministério</h2>
+
+    <!-- Notícias -->
+    <div class="section-title">📰 Notícias</div>
+    <div class="list-box">
+        <p>📢 Aviso importante sobre segurança nacional.</p>
+        <p>📌 Atualização na política de acesso.</p>
+    </div>
+
+    <!-- Dashboard -->
+    <h2 style="margin-top:35px;">📊 Dashboard Geral</h2>
+
+    <!-- Gráfico 1: Níveis de Segurança -->
+    <div class="chart-container">
+        <h3 style="text-align:center;color:#00bcd4;">Distribuição dos Níveis de Segurança</h3>
+        <canvas id="nivelChart"></canvas>
+    </div>
+
+    <!-- Gráfico 2: Acessos por dia -->
+    <div class="chart-container">
+        <h3 style="text-align:center;color:#00bcd4;">Acessos nos Últimos Dias</h3>
+        <canvas id="acessosChart"></canvas>
+    </div>
+
+    <!-- Gráfico 3: Divisões -->
+    <div class="chart-container">
+        <h3 style="text-align:center;color:#00bcd4;">Usuários por Divisão</h3>
+        <canvas id="divisaoChart"></canvas>
+    </div>
+
+    <!-- Usuários -->
+    <div class="section-title">👥 Usuários Cadastrados</div>
+    <div id="usuarios" class="list-box">Carregando usuários...</div>
+
+    <!-- Logins -->
+    <div class="section-title">📄 Registros de Login</div>
+    <div id="logs" class="list-box">Carregando registros...</div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* ------------------- BUSCA DE DADOS ------------------- */
+
+async function carregarUsuarios() {
+    const resp = await fetch("http://localhost:8000/usuarios");
+    return resp.ok ? resp.json() : [];
+}
+
+async function carregarLogs() {
+    const resp = await fetch("http://localhost:8000/logs");
+    return resp.ok ? resp.json() : [];
+}
+
+/* ------------------- RENDERIZAR LISTAS ------------------- */
+
+async function preencherListas() {
+    const usuarios = await carregarUsuarios();
+    const logs = await carregarLogs();
+
+    // Preencher usuários
+    document.getElementById("usuarios").innerHTML =
+        usuarios.map(u => `<p>• ${u.nome} — nível ${u.nivel_seguranca}</p>`).join("");
+
+    // Preencher logins (usar nome e timestamp)
+    document.getElementById("logs").innerHTML =
+        logs.map(l => {
+            const ts = l.timestamp || l.data || l.created_at || l.date || "";
+            const display = ts ? (new Date(ts)).toLocaleString() : "—";
+            return `<p>• ${l.nome || "Desconhecido"} — ${display}</p>`;
+        }).join("");
+}
+
+/* ------------------- DASHBOARD ------------------- */
+
+async function gerarDashboards() {
+    const usuarios = await carregarUsuarios();
+    const logs = await carregarLogs();
+
+    /* -------- Gráfico 1: Níveis -------- */
+    const nivelCount = {
+        1: usuarios.filter(u => Number(u.nivel_seguranca) === 1).length,
+        2: usuarios.filter(u => Number(u.nivel_seguranca) === 2).length,
+        3: usuarios.filter(u => Number(u.nivel_seguranca) === 3).length,
+    };
+
+    const ctxNivel = document.getElementById("nivelChart").getContext("2d");
+    new Chart(ctxNivel, {
+        type: "bar",
+        data: {
+            labels: ["Comum (1)", "Diretoria (2)", "Ministério (3)"],
+            datasets: [{
+                label: "Usuários",
+                data: [nivelCount[1], nivelCount[2], nivelCount[3]],
+                backgroundColor: ["#4fc3f7","#00bcd4","#0288d1"]
+            }]
+        }
+    });
+
+    /* -------- Gráfico 2: Acessos por dia -------- */
+    const acessosPorDia = {};
+    logs.forEach(l => {
+        const ts = l.timestamp || l.data || l.created_at || l.date || null;
+        if (!ts) return;
+        const dia = (new Date(ts)).toISOString().slice(0,10); // YYYY-MM-DD
+        acessosPorDia[dia] = (acessosPorDia[dia] || 0) + 1;
+    });
+
+    const dias = Object.keys(acessosPorDia).sort();
+    const acessos = dias.map(d => acessosPorDia[d]);
+
+    const ctxAcessos = document.getElementById("acessosChart").getContext("2d");
+    new Chart(ctxAcessos, {
+        type: "line",
+        data: {
+            labels: dias,
+            datasets: [{
+                label: "Acessos",
+                data: acessos,
+                borderColor: "#00bcd4",
+                fill: false,
+                tension: 0.25
+            }]
+        },
+        options: {
+            scales: {
+                x: { title: { display: true, text: 'Dia' } }
+            }
+        }
+    });
+
+    /* -------- Gráfico 3: Divisão -------- */
+    const divisaoCount = {
+        "Comum": usuarios.filter(u => u.division === "Comum").length,
+        "Diretoria": usuarios.filter(u => u.division === "Diretoria").length,
+        "Ministério": usuarios.filter(u => u.division === "Ministério").length
+    };
+
+    const ctxDiv = document.getElementById("divisaoChart").getContext("2d");
+    new Chart(ctxDiv, {
+        type: "doughnut",
+        data: {
+            labels: Object.keys(divisaoCount),
+            datasets: [{
+                data: Object.values(divisaoCount),
+                backgroundColor: ["#4fc3f7","#00bcd4","#0288d1"]
+            }]
+        }
+    });
+}
+
+/* INICIALIZAÇÂO */
+(async function init() {
+    await preencherListas();
+    await gerarDashboards();
+    document.getElementById("bemVindo").textContent =
+        "Bem-vindo, " + (localStorage.getItem("usuario_nome") || "Usuário") + "!";
+})();
+
+</script>
+
+</body>
+</html>

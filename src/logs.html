@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>Logs do Sistema</title></head>
+<body>
+  <h2>Logs de acesso</h2>
+  <div id="out"></div>
+  <button onclick="window.location.href='painel_ministerio.html'">Voltar</button>
+  <script>
+    // Só acesso para nível 3
+    if(Number(localStorage.getItem("auth_nivel")) < 3) window.location.href = "index.html";
+    fetch("http://localhost:8000/logs")
+      .then(resp => resp.json())
+      .then(dados => {
+        let html = "<table border=1><tr><th>Nome</th><th>Nível</th><th>Data</th><th>Status</th><th>Msg</th></tr>";
+        for(let l of dados) {
+          html += `<tr>
+            <td>${l.nome||""}</td>
+            <td>${l.nivel_seguranca||""}</td>
+            <td>${l.timestamp||""}</td>
+            <td>${l.acesso?"OK":"Negado"}</td>
+            <td>${l.msg||""}</td>
+          </tr>`;
+        }
+        html += "</table>";
+        document.getElementById("out").innerHTML = html;
+      });
+  </script>
+</body>
+</html>

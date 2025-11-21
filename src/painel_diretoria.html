@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="KeyFace.png">
+<title>Painel da Diretoria - KeyFace</title>
+
+<style>
+/* mesmo estilo do painel comum */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    :root {
+        --bg-color: #1a1a2e;
+        --card-color: #2c2c54;
+        --primary-color: #00bcd4;
+        --text-color: #e0e0e0;
+    }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        text-align: center;
+    }
+    .container {
+        background: var(--card-color);
+        padding: 30px;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.6);
+    }
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .card-header img { width: 60px; }
+    .back-link { color: var(--primary-color); text-decoration: none; }
+    h2 { color: var(--primary-color); }
+    .section-title { margin-top: 25px; font-weight: 600; }
+    .list-box {
+        background: rgba(255,255,255,0.1);
+        padding: 15px;
+        border-radius: 8px;
+        text-align: left;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+    <div class="card-header">
+    <img src="KeyFace (1).png">
+
+    <span id="bemVindo" style="font-weight:600; font-size:1rem; color:var(--primary-color);">
+        Bem-vindo!
+    </span>
+
+    <a href="index.html" class="back-link">⟵ Sair</a>
+    </div>
+
+    <h2>Painel da Diretoria</h2>
+
+    <div class="section-title">📰 Notícias</div>
+    <div class="list-box">
+        <p>📢 Reunião geral amanhã às 8h.</p>
+        <p>👤 Novo sistema de acesso facial implementado.</p>
+        <p>📌 Treinamento de segurança na segunda-feira.</p>
+    </div>
+
+    <div class="section-title">👥 Usuários Cadastrados</div>
+    <div id="usuarios" class="list-box">
+        Carregando usuários...
+    </div>
+</div>
+
+<script>
+fetch("http://localhost:8000/usuarios")
+    .then(r => r.json())
+    .then(data => {
+        const box = document.getElementById("usuarios");
+        box.innerHTML = "";
+        data.forEach(u => {
+            box.innerHTML += `<p>• ${u.nome} — nível ${u.nivel_seguranca}</p>`;
+        });
+    });
+document.getElementById("bemVindo").textContent =
+    "Bem-vindo, " + (localStorage.getItem("usuario_nome") || "Usuário") + "!";
+</script>
+
+</body>
+</html>
