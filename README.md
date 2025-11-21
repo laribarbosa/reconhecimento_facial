@@ -48,7 +48,7 @@ Ele inclui:
 
 1️⃣ Criar ambiente virtual
 
-```powershell
+(powershell)
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
